@@ -458,3 +458,18 @@ kbd { font-family: inherit; font-size: .88em; background: #fff; border: 1px soli
   .badge, .t-marca { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .tema pre { background: #fff; color: #000; border: 1px solid #999; white-space: pre-wrap; }
 }
+
+/* ---------- Íconos del menú ---------- */
+.menu a { justify-content: flex-start; gap: 12px; padding: 7px 16px 7px 18px; }
+.menu .mi {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: grid; place-items: center;
+  color: var(--ic, #d79bc8);
+  background: rgba(255, 255, 255, .06);
+  background: color-mix(in srgb, var(--ic, #d79bc8) 16%, transparent);
+}
+.menu .m-txt { flex: 1; min-width: 0; }
+.menu a:hover .mi { background: color-mix(in srgb, var(--ic, #d79bc8) 26%, transparent); }
+.menu a.on .mi { background: var(--ic, #d79bc8); color: var(--ciruela); }
+.menu a.on::before { background: var(--ic, #d79bc8); }
+.menu .cuenta { background: var(--ic, #d79bc8); }
