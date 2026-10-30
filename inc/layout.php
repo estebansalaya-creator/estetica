@@ -13,7 +13,45 @@ function menu_items()
         ['servicios.php',     'Servicios',                                'servicios'],
         ['profesionales.php', 'Profesionales',                            'profesionales'],
         ['ajustes.php',       'Ajustes',                                  'ajustes'],
+        ['ayuda.php',         'Ayuda',                                    'ayuda'],
     ];
+}
+
+/** URL de un archivo de assets con su fecha de modificación, para que el navegador no use una copia vieja al actualizar */
+function asset_url($ruta)
+{
+    $archivo = __DIR__ . '/../' . $ruta;
+    return url($ruta) . '?v=' . (is_file($archivo) ? filemtime($archivo) : '1');
+}
+
+/** Botón "?" que abre la ayuda en el tema de la pantalla actual */
+function ayuda_link()
+{
+    $script = basename($_SERVER['SCRIPT_NAME']);
+    if (!puede('ayuda') || $script === 'ayuda.php' || http_response_code() === 403) {
+        return '';
+    }
+    $prof = es_profesional();
+    $mapa = [
+        'index.php'            => $prof ? 'mi-agenda' : 'dia',
+        'agenda.php'           => $prof ? 'mi-agenda' : 'agenda',
+        'turno.php'            => $prof ? 'atender' : (get('id') && get('editar') === null ? 'estados' : 'dar-turno'),
+        'clientes.php'         => $prof ? 'fichas-prof' : 'clientes',
+        'cliente.php'          => $prof ? 'fichas-prof' : 'clientes',
+        'cliente_form.php'     => 'clientes',
+        'cobro.php'            => 'cobrar',
+        'recibo.php'           => es_admin() ? 'anular' : 'cobrar',
+        'caja.php'             => es_admin() ? 'caja-admin' : 'caja',
+        'servicios.php'        => 'servicios',
+        'servicio_form.php'    => 'servicios',
+        'profesionales.php'    => 'profesionales',
+        'profesional_form.php' => 'profesionales',
+        'ajustes.php'          => 'ajustes',
+        'usuarios.php'         => 'usuarios',
+        'abm.php'              => get('t') === 'cabinas' ? 'cabinas' : (get('t') === 'categorias' ? 'categorias' : 'ajustes'),
+    ];
+    $ancla = isset($mapa[$script]) ? $mapa[$script] : '';
+    return '<a class="btn-ayuda" href="' . url('ayuda.php') . ($ancla !== '' ? '#' . e($ancla) : '') . '" title="Ayuda de esta pantalla" aria-label="Ayuda de esta pantalla">?</a>';
 }
 
 /**
@@ -33,10 +71,10 @@ function layout_header($titulo, array $op = [])
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($titulo) ?> | <?= e($centro) ?></title>
-<link rel="stylesheet" href="<?= url('assets/app.css') ?>?v=1">
+<link rel="stylesheet" href="<?= asset_url('assets/app.css') ?>">
 <meta name="csrf" content="<?= e(csrf_token()) ?>">
 <meta name="base" content="<?= e(url()) ?>">
-<script src="<?= url('assets/app.js') ?>?v=1"></script>
+<script src="<?= asset_url('assets/app.js') ?>"></script>
 </head>
 <body class="<?= e($clase) ?>">
 <?php if ($u): ?>
@@ -66,6 +104,7 @@ function layout_header($titulo, array $op = [])
       <h1><?= e($titulo) ?></h1>
       <?= isset($op['acciones']) ? $op['acciones'] : '' ?>
       <?= estado_caja_pill() ?>
+      <?= ayuda_link() ?>
     </header>
     <?php endif; ?>
     <?php foreach (flashes() as $f): ?>
@@ -96,7 +135,7 @@ function layout_footer(array $scripts = [])
         echo "</main>\n";
     }
     foreach ($scripts as $s) {
-        echo '<script src="' . url($s) . '?v=1"></script>' . "\n";
+        echo '<script src="' . asset_url($s) . '"></script>' . "\n";
     }
     echo "</body>\n</html>";
 }

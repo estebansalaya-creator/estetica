@@ -122,6 +122,8 @@ Las **categorías** (Faciales, Depilación, Masajes…) agrupan los servicios y 
 
 ## Cómo se usa en el día
 
+El manual completo está dentro de la app: menú **Ayuda** (cada rol ve su parte, con buscador y opción de imprimir) y el botón **?** arriba a la derecha de cada pantalla, que abre la explicación de esa pantalla.
+
 1. **Abrir caja** con el efectivo inicial.
 2. En **Inicio** están los turnos del día, lo atendido sin cobrar y los **recordatorios para mañana**: un botón por turno abre WhatsApp con el mensaje armado (se edita en Ajustes).
 3. **Agenda**: una columna por profesional, con filtro por categoría. Clic en un espacio libre para dar un turno a esa hora. Las zonas rayadas son fuera de horario.
@@ -172,6 +174,7 @@ servicio_form.php     Alta/edición de servicio
 profesionales.php     Profesionales y sus horarios
 profesional_form.php  Datos, color, horario semanal y servicios que hace
 ajustes.php           Datos del centro, agenda, mensaje de recordatorio
+ayuda.php             Manual de uso por rol (recepción, profesionales, administrador, técnico)
 usuarios.php          Usuarios y roles
 abm.php               Categorías, cabinas/equipos, medios de pago
 api/                  Búsqueda de clientes y día del profesional (JSON)
