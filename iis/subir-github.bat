@@ -27,8 +27,8 @@ if not errorlevel 1 (
 git diff --cached --quiet
 if errorlevel 1 (
   echo.
-  echo Archivos que se van a subir:
-  git diff --cached --name-status
+  echo Archivos a subir:
+  git --no-pager diff --cached --name-status
   echo.
   set "MSG="
   set /p "MSG=Descripcion del cambio [Actualizacion]: "
