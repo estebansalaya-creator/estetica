@@ -42,7 +42,7 @@ $proximosMios = $mio ? q_all(
 ) : [];
 
 $saludo = (int)date('G') < 13 ? 'Buen día' : ((int)date('G') < 20 ? 'Buenas tardes' : 'Buenas noches');
-layout_header($saludo . ', ' . explode(' ', usuario()['nombre'])[0]);
+layout_header($saludo . ', ' . explode(' ', usuario()['nombre'])[0], ['clase' => 'pagina-inicio']);
 ?>
 <p class="apagado" style="margin-top:-12px"><?= e(ucfirst(fecha_larga($hoy))) ?></p>
 

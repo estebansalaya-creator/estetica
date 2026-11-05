@@ -217,6 +217,23 @@ label.check { font-weight: 500; display: inline-flex; align-items: center; curso
 .antecedentes { border-left: 4px solid var(--coral); background: var(--coral-suave); color: #6e231e; padding: 10px 14px; border-radius: 0 8px 8px 0; margin-bottom: 16px; white-space: pre-line; }
 .antecedentes b { display: block; margin-bottom: 2px; }
 
+/* ---------- Inicio: logo del centro de fondo ---------- */
+.pagina-inicio .contenido { position: relative; isolation: isolate; }
+.pagina-inicio .contenido::before {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+  top: 0; bottom: 0; left: 216px; right: 0;
+  background: url(img/logo-fondo.png) center 62% / min(58%, 640px) auto no-repeat;
+  opacity: .18;
+}
+.pagina-inicio .card,
+.pagina-inicio .cifras { background: rgba(255, 255, 255, .8); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+@media (max-width: 900px) {
+  .pagina-inicio .contenido::before { left: 0; background-size: min(82%, 460px) auto; background-position: center 70%; }
+}
+@media print {
+  .pagina-inicio .contenido::before { display: none; }
+}
+
 /* ---------- Login ---------- */
 .login { background: var(--papel); border-radius: 14px; padding: 32px 30px 26px; width: 100%; max-width: 370px; }
 .login h1 { font-size: 32px; margin-bottom: 6px; }
