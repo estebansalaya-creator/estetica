@@ -32,6 +32,7 @@ layout_header('Ayuda');
         <a href="#estados">Estados del turno</a>
         <a href="#reprogramar">Reprogramar o cancelar</a>
         <a href="#recordatorios">Recordatorios por WhatsApp</a>
+        <a href="#aviso-profesional">Avisar al profesional</a>
         <a href="#clientes">Fichas de clientes</a>
         <a href="#cobrar">Cobrar</a>
         <a href="#cobro-sin-turno">Cobro sin turno</a>
@@ -185,6 +186,19 @@ layout_header('Ayuda');
         <p>Para que funcione, el teléfono de la ficha tiene que tener el código de área, sin 0 ni 15: <code>11 5555-1234</code>, <code>351 555-1234</code>. El texto del mensaje se cambia en <b>Ajustes</b>.</p>
       </article>
 
+      <article class="tema card" id="aviso-profesional">
+        <h3>Avisar al profesional por WhatsApp</h3>
+        <p>Cuando das un turno, lo reprogramás o lo cancelás, arriba de la pantalla aparece un cartel verde con el botón <b>Avisar a … por WhatsApp</b>. Abre WhatsApp con el mensaje ya escrito para el profesional: día y hora, cliente, servicio, cabina y aclaraciones. Revisalo y envialo.</p>
+        <ul>
+          <li><b>Reprogramar</b>: el mensaje dice qué cambió y, si cambió el horario, cómo era antes y cómo quedó.</li>
+          <li><b>Si el turno pasa a otro profesional</b> aparecen dos botones: uno para avisarle al que lo tenía y otro para el que lo recibe.</li>
+          <li><b>Cancelar</b>: avisa que el horario le quedó libre, con el motivo si lo escribiste.</li>
+          <li>Si cerraste el cartel, en el turno está el botón <b>Avisar a …</b> para mandarle los datos cuando quieras.</li>
+        </ul>
+        <p>No avisa turnos que ya pasaron ni cambios de precio. Si el cambio lo hace el mismo profesional desde su usuario, tampoco. El mensaje sale desde el WhatsApp que esté abierto en esa compu o celular: para que salga desde el número del local, dejá abierto WhatsApp Web con esa cuenta.</p>
+        <p>Para que funcione, el profesional tiene que tener el teléfono cargado en <b>Profesionales</b>, con código de área y sin 0 ni 15. Si no lo tiene, el cartel lo avisa.</p>
+      </article>
+
       <article class="tema card" id="clientes">
         <h3>Fichas de clientes</h3>
         <p>En <b>Clientes</b> se busca por nombre, apellido, teléfono, DNI o email. Las fichas también se crean solas al dar un turno a alguien nuevo.</p>
@@ -313,7 +327,7 @@ layout_header('Ayuda');
         <h3>Profesionales y horarios</h3>
         <p>En <b>Profesionales</b> está la lista con sus categorías, su horario y cuántos turnos tienen por delante. En cada profesional:</p>
         <ul>
-          <li><b>Datos</b>: nombre, especialidad, teléfono, <b>color</b> de sus turnos en la agenda y <b>orden</b> de su columna (también decide a quién se asigna primero un turno de "cualquier profesional libre").</li>
+          <li><b>Datos</b>: nombre, especialidad, teléfono (para <a href="#aviso-profesional">avisarle por WhatsApp</a> de sus turnos), <b>color</b> de sus turnos en la agenda y <b>orden</b> de su columna (también decide a quién se asigna primero un turno de "cualquier profesional libre").</li>
           <li><b>Horario de atención</b>: hasta dos franjas por día (para quien corta al mediodía). Día vacío = no trabaja. <b>Copiar el horario del lunes de martes a viernes</b> ahorra tiempo.</li>
           <li><b>Categorías</b>: tildá todas en las que trabaja. Si marcás una categoría y no tenía ningún servicio de ella, se tildan todos; después destildá los que no hace.</li>
           <li><b>Servicios que realiza</b>.</li>

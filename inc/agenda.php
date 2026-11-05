@@ -298,7 +298,7 @@ function turno_get($id)
 {
     return q_row(
         "SELECT t.*, c.nombre, c.apellido, c.telefono, c.email, c.antecedentes, c.dni,
-                p.nombre AS profesional, p.color, cb.nombre AS cabina, u.nombre AS creado_por
+                p.nombre AS profesional, p.color, p.telefono AS profesional_telefono, cb.nombre AS cabina, u.nombre AS creado_por
            FROM turnos t
            JOIN clientes c ON c.id = t.cliente_id
            JOIN profesionales p ON p.id = t.profesional_id
@@ -322,6 +322,154 @@ function mensaje_recordatorio(array $t)
         '{centro}'      => config_get('nombre_centro', ''),
         '{direccion}'   => config_get('direccion', ''),
     ]);
+}
+
+/* ---------- Aviso al profesional por WhatsApp ----------
+ * Al dar, reprogramar o cancelar un turno queda un botón en la pantalla siguiente
+ * que abre WhatsApp con el mensaje armado para el profesional (se envía a mano, como los recordatorios).
+ */
+
+/** "martes 5 de noviembre, 15:00 a 16:00 hs" */
+function aviso_cuando(array $t)
+{
+    return fecha_larga($t['inicio']) . ', ' . hora($t['inicio']) . ' a ' . hora($t['fin']) . ' hs';
+}
+
+/** Qué cambió entre dos versiones del turno que le importe al profesional */
+function turno_cambios(array $a, array $b)
+{
+    $c = [];
+    if ($a['inicio'] !== $b['inicio'] || $a['fin'] !== $b['fin']) {
+        $c[] = 'día y hora';
+    }
+    if ((string)$a['servicio_nombre'] !== (string)$b['servicio_nombre']) {
+        $c[] = 'servicio';
+    }
+    if ((int)$a['cliente_id'] !== (int)$b['cliente_id']) {
+        $c[] = 'cliente';
+    }
+    if ((int)$a['cabina_id'] !== (int)$b['cabina_id']) {
+        $c[] = 'cabina';
+    }
+    if (trim((string)$a['notas']) !== trim((string)$b['notas'])) {
+        $c[] = 'aclaraciones';
+    }
+    return $c;
+}
+
+/**
+ * Texto del aviso. $tipo: nuevo | cambio | cancelado | pasado (lo atiende otro) | resumen
+ * $t es el turno como quedó (turno_get) y $antes, el turno antes del cambio.
+ */
+function mensaje_aviso_profesional($tipo, array $t, $nombreProf, array $antes = null)
+{
+    $hola = 'Hola ' . explode(' ', trim($nombreProf))[0] . '!';
+    $cli = nombre_cliente($t);
+    $centro = config_get('nombre_centro', '');
+    $firma = $centro !== '' ? "\n— " . $centro : '';
+
+    if ($tipo === 'cancelado') {
+        $m = $hola . ' Se canceló el turno de ' . $cli . ' del ' . aviso_cuando($t) . ' (' . $t['servicio_nombre'] . ').';
+        if (trim((string)$t['motivo_cancelado']) !== '') {
+            $m .= "\nMotivo: " . trim($t['motivo_cancelado']);
+        }
+        return $m . "\nEse horario te quedó libre." . $firma;
+    }
+    if ($tipo === 'pasado' && $antes) {
+        return $hola . ' El turno de ' . nombre_cliente($antes) . ' del ' . aviso_cuando($antes) . ' (' . $antes['servicio_nombre'] . ')'
+            . ' ahora lo atiende ' . $t['profesional'] . '. Ya no está en tu agenda.' . $firma;
+    }
+
+    $cambios = ($tipo === 'cambio' && $antes) ? turno_cambios($antes, $t) : [];
+    $l = [];
+    if ($tipo === 'nuevo') {
+        $l[] = $hola . ' Tenés un turno nuevo:';
+    } elseif ($tipo === 'cambio') {
+        $l[] = $hola . ' Se modificó un turno tuyo' . ($cambios ? ' (cambió ' . implode(', ', $cambios) . ')' : '') . ':';
+    } else {
+        $l[] = $hola . ' Te paso los datos de este turno:';
+    }
+    if (in_array('día y hora', $cambios, true)) {
+        $l[] = 'Antes: ' . aviso_cuando($antes);
+        $l[] = '*Ahora: ' . aviso_cuando($t) . '*';
+    } else {
+        $l[] = '*' . ucfirst(aviso_cuando($t)) . '*';
+    }
+    $l[] = 'Cliente: ' . $cli;
+    $l[] = 'Servicio: ' . $t['servicio_nombre'];
+    if (!empty($t['cabina'])) {
+        $l[] = 'Cabina: ' . $t['cabina'];
+    }
+    if (trim((string)$t['notas']) !== '') {
+        $l[] = 'Aclaraciones: ' . trim($t['notas']);
+    } elseif (in_array('aclaraciones', $cambios, true)) {
+        $l[] = 'Aclaraciones: se borraron.';
+    }
+    if (trim((string)$t['antecedentes']) !== '') {
+        $l[] = 'Tiene antecedentes en la ficha: revisalos antes de atender.';
+    }
+    return implode("\n", $l) . $firma;
+}
+
+/**
+ * Deja el botón de aviso para la próxima pantalla. No avisa turnos que ya terminaron
+ * ni al profesional que hizo el cambio él mismo.
+ */
+function aviso_profesional($tipo, array $t, array $antes = null)
+{
+    $ref = ($tipo === 'pasado' && $antes) ? $antes : $t;
+    if (strtotime($ref['fin']) < time()) {
+        return;
+    }
+    if (es_profesional() && (int)mi_profesional_id() === (int)$ref['profesional_id']) {
+        return;
+    }
+    $_SESSION['avisos_wa'][] = [
+        'tipo'           => $tipo,
+        'profesional'    => $ref['profesional'],
+        'profesional_id' => (int)$ref['profesional_id'],
+        'cliente'        => nombre_cliente($t),
+        'link'           => whatsapp_link($ref['profesional_telefono'], mensaje_aviso_profesional($tipo, $t, $ref['profesional'], $antes)),
+    ];
+    $_SESSION['avisos_wa'] = array_slice($_SESSION['avisos_wa'], -6);
+}
+
+/** Después de editar un turno: avisa si cambió algo (a los dos, si pasó a otro profesional) */
+function avisar_cambios_turno(array $antes, $id)
+{
+    if (!in_array($antes['estado'], ['reservado', 'confirmado', 'en_atencion'], true)) {
+        return;
+    }
+    $t = turno_get($id);
+    if (!$t) {
+        return;
+    }
+    if ((int)$t['profesional_id'] !== (int)$antes['profesional_id']) {
+        aviso_profesional('pasado', $t, $antes);
+        aviso_profesional('nuevo', $t);
+    } elseif (turno_cambios($antes, $t)) {
+        aviso_profesional('cambio', $t, $antes);
+    }
+}
+
+/** Avisos pendientes de mostrar (se muestran una sola vez) */
+function avisos_wa()
+{
+    $a = isset($_SESSION['avisos_wa']) ? $_SESSION['avisos_wa'] : [];
+    unset($_SESSION['avisos_wa']);
+    return $a;
+}
+
+/** Texto del cartel que acompaña al botón */
+function aviso_wa_texto(array $a)
+{
+    switch ($a['tipo']) {
+        case 'nuevo':     return 'Turno nuevo de ' . $a['cliente'] . ' con ' . $a['profesional'] . '.';
+        case 'cambio':    return 'Cambió el turno de ' . $a['cliente'] . ' con ' . $a['profesional'] . '.';
+        case 'cancelado': return 'Se canceló el turno de ' . $a['cliente'] . ' con ' . $a['profesional'] . '.';
+        case 'pasado':    return 'El turno de ' . $a['cliente'] . ' ya no es de ' . $a['profesional'] . '.';
+    }
+    return '';
 }
 
 /** Servicios activos agrupados por categoría, con los profesionales que los hacen (para el formulario de turno) */

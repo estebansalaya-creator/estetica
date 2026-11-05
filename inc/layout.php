@@ -130,6 +130,16 @@ function layout_header($titulo, array $op = [])
     <?php foreach (flashes() as $f): ?>
       <div class="aviso aviso-<?= e($f['tipo']) ?>" role="status"><?= e($f['msg']) ?></div>
     <?php endforeach; ?>
+    <?php foreach (avisos_wa() as $a): $pn = explode(' ', trim($a['profesional']))[0]; ?>
+      <div class="aviso aviso-wa" role="status">
+        <span><?= e(aviso_wa_texto($a)) ?></span>
+        <?php if ($a['link']): ?>
+          <a class="btn btn-chico btn-wa" href="<?= e($a['link']) ?>" target="_blank" rel="noopener" onclick="var b=this; setTimeout(function(){ b.outerHTML='<small>Abierto en WhatsApp</small>'; }, 300)">Avisar a <?= e($pn) ?> por WhatsApp</a>
+        <?php else: ?>
+          <small><?= e($pn) ?> no tiene teléfono cargado. <?php if (puede('profesionales')): ?><a href="<?= url('profesional_form.php?id=' . $a['profesional_id']) ?>">Cargalo</a> para poder avisarle por WhatsApp.<?php endif; ?></small>
+        <?php endif; ?>
+      </div>
+    <?php endforeach; ?>
 <?php else: ?>
 <main class="solo">
 <?php endif;

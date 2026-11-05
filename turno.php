@@ -44,6 +44,9 @@ if (es_post()) {
             $motivo = $nuevo === 'cancelado' ? trim((string)post('motivo')) : null;
             q('UPDATE turnos SET estado = ?, motivo_cancelado = ?, actualizado = NOW() WHERE id = ?', [$nuevo, $motivo ?: null, $id]);
             flash('ok', 'Turno ' . mb_strtolower(estado_turno_txt($nuevo)) . '.');
+            if ($nuevo === 'cancelado' && $t['estado'] !== 'cancelado') {
+                aviso_profesional('cancelado', turno_get($id));
+            }
             if ($nuevo === 'cancelado') {
                 redirect($volverAgenda($t['inicio'], $t['profesional_id']));
             }
@@ -152,6 +155,7 @@ if (es_post()) {
                 );
                 $pdo->commit();
                 flash('ok', 'Turno actualizado.' . ($asignado ? ' Quedó con ' . $asignado['nombre'] . ' (asignado automáticamente).' : ''));
+                avisar_cambios_turno($t, $id);
                 redirect(url('turno.php?id=' . $id));
             }
             q(
@@ -162,6 +166,7 @@ if (es_post()) {
             );
             $nuevoId = (int)$pdo->lastInsertId();
             $pdo->commit();
+            aviso_profesional('nuevo', turno_get($nuevoId));
             flash('ok', 'Turno agendado: ' . fecha_relativa($d['inicio']) . ' a las ' . hora($d['inicio']) . ($asignado ? ' con ' . $asignado['nombre'] . ' (asignado automáticamente)' : '') . '.');
             redirect(url(post('otro')
                 ? 'turno.php?cliente=' . $d['cliente_id'] . '&fecha=' . $fechaP . '&hora=' . hora($d['fin']) . ($catId ? '&categoria=' . $catId : '')
@@ -291,6 +296,9 @@ layout_header($titulo, ['activo' => 'agenda.php']);
         <?php if ($t['telefono'] && in_array($t['estado'], ['reservado', 'confirmado'], true)): ?>
           <form method="post" class="inline" target="_blank"><?= csrf_field() ?><input type="hidden" name="accion" value="whatsapp">
             <button class="btn btn-wa" type="submit"><?= $t['recordado'] ? 'Volver a enviar recordatorio' : 'Recordatorio por WhatsApp' ?></button></form>
+        <?php endif; ?>
+        <?php if (in_array($t['estado'], ['reservado', 'confirmado'], true) && !$pasado && ($waProf = whatsapp_link($t['profesional_telefono'], mensaje_aviso_profesional('resumen', $t, $t['profesional'])))): ?>
+          <a class="btn btn-wa" href="<?= e($waProf) ?>" target="_blank" rel="noopener">Avisar a <?= e(explode(' ', trim($t['profesional']))[0]) ?></a>
         <?php endif; ?>
         <a class="btn" href="<?= url('turno.php?cliente=' . $t['cliente_id']) ?>">Darle otro turno</a>
         <span class="espacio"></span>

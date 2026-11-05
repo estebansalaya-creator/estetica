@@ -135,6 +135,7 @@ El manual completo está dentro de la app: menú **Ayuda** (cada rol ve su parte
    - Si se superpone con otro turno del profesional, queda fuera de su horario o el profesional no hace ese servicio, avisa y deja guardar igual confirmando.
    - "Agendar y sumar otro servicio" guarda y abre otro turno para la misma persona a continuación.
 5. **En el turno**: Llegó → Atendido, o No vino; reprogramar; cancelar; recordatorio por WhatsApp; notas de la sesión.
+   Al dar, reprogramar o cancelar un turno aparece un botón para **avisarle al profesional por WhatsApp** (necesita su teléfono cargado en Profesionales).
 6. **Cobrar**: se ven todos los turnos sin cobrar de esa persona (también futuros, para pago adelantado). Se pueden sumar otros conceptos (productos, seña), aplicar descuento en monto o porcentaje (`10%`) y **dividir el pago** en varios medios. Calcula el vuelto. Genera un recibo imprimible (no válido como factura).
 7. **Cerrar caja** al final del día contando el efectivo: registra la diferencia.
 
