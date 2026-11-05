@@ -244,6 +244,18 @@ label.check { font-weight: 500; display: inline-flex; align-items: center; curso
     radial-gradient(90% 80% at 0% 100%, #3a2a40 0%, transparent 55%),
     var(--ciruela);
 }
+/* Con logo: el logo arriba del formulario y el monograma suave de fondo */
+.login-logo { margin: -8px auto 12px; max-width: 250px; }
+.login-logo img { display: block; width: 100%; height: auto; }
+.con-logo .login p { text-align: center; }
+.con-logo .solo { position: relative; overflow: hidden; isolation: isolate; }
+.con-logo .solo::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  width: min(92vmin, 820px); aspect-ratio: 720 / 703;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: url(img/logo-monograma.png) center / contain no-repeat;
+  opacity: .1;
+}
 
 /* ---------- Agenda ---------- */
 .ag-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }

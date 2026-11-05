@@ -17,11 +17,18 @@ if (es_post()) {
     $error = 'Usuario o contraseña incorrectos.';
 }
 
-layout_header('Ingresar', ['clase' => 'pagina-login']);
+$centro = config_get('nombre_centro', 'Centro de Estética');
+// Si está el logo del centro en assets/img se muestra en lugar del nombre
+$logo = is_file(__DIR__ . '/assets/img/logo-login.png');
+layout_header('Ingresar', ['clase' => 'pagina-login' . ($logo ? ' con-logo' : '')]);
 ?>
 <form method="post" class="login">
   <?= csrf_field() ?>
-  <h1><?= e(config_get('nombre_centro', 'Centro de Estética')) ?></h1>
+  <?php if ($logo): ?>
+  <h1 class="login-logo"><img src="<?= asset_url('assets/img/logo-login.png') ?>" alt="<?= e($centro) ?>" width="640" height="479"></h1>
+  <?php else: ?>
+  <h1><?= e($centro) ?></h1>
+  <?php endif; ?>
   <p>Ingresá con tu usuario para ver la agenda.</p>
   <?php if ($error): ?><div class="aviso aviso-error"><?= e($error) ?></div><?php endif; ?>
   <div class="campo">
